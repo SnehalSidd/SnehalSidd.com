@@ -1,0 +1,28 @@
+{
+  "files": {
+    "main.css": "/react_upload/static/css/main.9882ed2d.css",
+    "main.js": "/react_upload/static/js/main.ddeb0b5d.js",
+    "static/js/453.c8013b39.chunk.js": "/react_upload/static/js/453.c8013b39.chunk.js",
+    "static/media/marketing.png": "/react_upload/static/media/marketing.928cc16a9ca8555b7750.png",
+    "static/media/butterfly1_cover.jpeg": "/react_upload/static/media/butterfly1_cover.46254531f5e54fb311cd.jpeg",
+    "static/media/design3.png": "/react_upload/static/media/design3.14a404a4e7350cd59540.png",
+    "static/media/design4.png": "/react_upload/static/media/design4.00d5a6382779e1d34a4d.png",
+    "static/media/design2.png": "/react_upload/static/media/design2.66c1c18dc510a80540d7.png",
+    "static/media/design1.png": "/react_upload/static/media/design1.87a0d206d2087f7dfc22.png",
+    "static/media/photography.png": "/react_upload/static/media/photography.e5e3b6a35598ec4695ee.png",
+    "static/media/marketing2.png": "/react_upload/static/media/marketing2.81763b2c699918e4439f.png",
+    "static/media/marketing3.png": "/react_upload/static/media/marketing3.cee04620da83e1270c1e.png",
+    "static/media/que-es-el-marketing-digital-1-1024x640.jpg": "/react_upload/static/media/que-es-el-marketing-digital-1-1024x640.fd49ebc7ca18196d473c.jpg",
+    "static/media/360_F_622928562_CL2Lime3eudzDXuKckOP9McOBjrQnE8W.jpg": "/react_upload/static/media/360_F_622928562_CL2Lime3eudzDXuKckOP9McOBjrQnE8W.8afcdba59df4021a4a57.jpg",
+    "static/media/photographers.jpg": "/react_upload/static/media/photographers.ff4fef19c0cd58a5b073.jpg",
+    "static/media/logo.svg": "/react_upload/static/media/logo.6ce24c58023cc2f8fd88fe9d219db6c6.svg",
+    "index.html": "/react_upload/index.html",
+    "main.9882ed2d.css.map": "/react_upload/static/css/main.9882ed2d.css.map",
+    "main.ddeb0b5d.js.map": "/react_upload/static/js/main.ddeb0b5d.js.map",
+    "453.c8013b39.chunk.js.map": "/react_upload/static/js/453.c8013b39.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.9882ed2d.css",
+    "static/js/main.ddeb0b5d.js"
+  ]
+}
