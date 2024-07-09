@@ -681,7 +681,7 @@ img{
     grid-column: span 1;
     grid-row: span 4;
     background-color: #feb300;
-    background-image: url('./360_F_622928562_CL2Lime3eudzDXuKckOP9McOBjrQnE8W.jpg');
+    background-image: url('/opt/render/project/src/public/360_F_622928562_CL2Lime3eudzDXuKckOP9McOBjrQnE8W.jpg');
     background-size: cover; /* Ensures the image covers the entire area */
     background-position: center; /* Centers the image */
     background-repeat: no-repeat;
@@ -690,7 +690,7 @@ img{
   .project2 {
     grid-column: span 2;
     background-color: #feb300;
-    background-image: url('./photographers.jpg');
+    background-image: url('/opt/render/project/src/public/photographers.jpg');
     background-size: cover;
     background-position: center; /* Centers the image */
     /* background-repeat: no-repeat; */
@@ -700,7 +700,7 @@ img{
     grid-column: span 2;
     grid-row: span 3;
     background-color: #feb300;
-    background-image: url('./design1.png');
+    background-image: url('/opt/render/project/src/public/design1.png');
     background-size: cover; /* Ensures the image covers the entire area */
     background-position: center; /* Centers the image */
     background-repeat: no-repeat;
@@ -709,7 +709,7 @@ img{
     grid-column: span 2;
     grid-row: span 2;
     background-color: #feb300;
-    background-image: url('./design3.png');
+    background-image: url('/opt/render/project/src/public/design3.png');
     background-size: cover; /* Ensures the image covers the entire area */
     background-position: center; /* Centers the image */
     background-repeat: no-repeat;
@@ -719,7 +719,7 @@ img{
     grid-column: span 2;
     grid-row: span 2;
     background-color: #feb300;
-    background-image: url('./photography.png');
+    background-image: url('/opt/render/project/src/public/photography.png');
     background-size: cover; /* Ensures the image covers the entire area */
     background-position: center; /* Centers the image */
     background-repeat: no-repeat;
@@ -731,7 +731,7 @@ img{
     grid-row: span 2;
     background-color: #feb300;
     
-    background-image: url('./marketing3.png');
+    background-image: url('/opt/render/project/src/public/marketing3.png');
     background-size: cover; /* Ensures the image covers the entire area */
     background-position: center; /* Centers the image */
     background-repeat: no-repeat;
@@ -740,21 +740,21 @@ img{
 }
 .project6{
   /* display: none; */
-  background-image: url('./butterfly1_cover.jpeg');
+  background-image: url('/opt/render/project/src/public/butterfly1_cover.jpeg');
   background-size: cover; /* Ensures the image covers the entire area */
   background-position: center; /* Centers the image */
   background-repeat: no-repeat;
 }
 .project8{
   display: none;
-  background-image: url('./design4.png');
+  background-image: url('/opt/render/project/src/public/design4.png');
   background-size: cover; /* Ensures the image covers the entire area */
   background-position: center; /* Centers the image */
   background-repeat: no-repeat;
 }
 .project9{
   display: none;
-  background-image: url('./marketing.png');
+  background-image: url('/opt/render/project/src/public/marketing.png');
   background-size: cover; /* Ensures the image covers the entire area */
   background-position: center; /* Centers the image */
   background-repeat: no-repeat;
@@ -766,21 +766,21 @@ img{
 }
 .project10{
   display: none;
-  background-image: url('./que-es-el-marketing-digital-1-1024x640.jpg');
+  background-image: url('/opt/render/project/src/public/que-es-el-marketing-digital-1-1024x640.jpg');
   background-size: cover; /* Ensures the image covers the entire area */
   background-position: center; /* Centers the image */
   background-repeat: no-repeat;
 }
 .project11{
   display: none;
-  background-image: url('./design2.png');
+  background-image: url('/opt/render/project/src/public/design2.png');
   background-size: cover; /* Ensures the image covers the entire area */
   background-position: center; /* Centers the image */
   background-repeat: no-repeat;
 }
 .project12{
   display: none;
-  background-image: url('./marketing2.png');
+  background-image: url('/opt/render/project/src/public/marketing2.png');
   background-size: cover; /* Ensures the image covers the entire area */
   background-position: center; /* Centers the image */
   background-repeat: no-repeat;
@@ -982,4 +982,3 @@ img{
     }
   
   }
-
