@@ -293,7 +293,7 @@ function App() {
                <span>
                Contact: 
                <span className="number">
-               +91 8924028963
+               +91 8900000000
                </span>
                </span>
                <span className="icons">
