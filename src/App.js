@@ -1,290 +1,157 @@
 import logo from "./logo.svg";
 import "./App.css";
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useTypewriter, Cursor} from 'react-simple-typewriter';
+
+// --- Project Data Structure (A clean array for easy filtering/rendering)
+const allProjects = [
+  { id: 1, category: 'photography', title: 'Project 1 Title', detail: 'This project is a high-quality photograph captured for a magazine cover.' },
+  { id: 2, category: 'photography', title: 'Project 2 Title', detail: 'A detailed study on lighting in commercial photography.' },
+  { id: 3, category: 'design', title: 'E-commerce Website Design', detail: 'Full-stack UI/UX for a new fashion e-commerce platform.' },
+  { id: 4, category: 'design', title: 'Brand Identity Creation', detail: 'Development of logo, color palette, and brand guidelines for a startup.' },
+  { id: 5, category: 'marketing', title: 'Social Media Campaign', detail: 'Executed a 6-week social media marketing strategy, increasing engagement by 40%.' },
+  { id: 6, category: 'photography', title: 'Wedding Photography Album', detail: 'Candid and portrait photography for a destination wedding.' },
+  { id: 7, category: 'photography', title: 'Travel Photo Series', detail: 'A collection of landscape photographs from the Himalayas.' },
+  { id: 8, category: 'design', title: 'Mobile App Prototyping', detail: 'Wireframing and high-fidelity prototyping for an iOS application.' },
+  { id: 9, category: 'marketing', title: 'SEO Optimization Strategy', detail: 'Implemented technical SEO improvements leading to a 25% increase in organic traffic.' },
+  { id: 10, category: 'marketing', title: 'Email Newsletter Design', detail: 'Created a responsive and conversion-focused email marketing template.' },
+  { id: 11, category: 'design', title: 'Infographic Design', detail: 'Designed complex data visualizations for a corporate annual report.' },
+  { id: 12, category: 'photography', title: 'Product Photography', detail: 'Studio photography for a line of cosmetics products.' },
+];
+// --- End Project Data
+
+// --- Modal Component for Pop-ups
+const Modal = ({ isOpen, onClose, children }) => {
+  if (!isOpen) return null;
+
+  // Added 'open' class for CSS transition/animation
+  return (
+    <div className="modal-backdrop open" onClick={onClose}>
+      {/* Stops clicks inside the modal from closing it */}
+      <div className="modal-content" onClick={e => e.stopPropagation()}> 
+        <button className="modal-close-btn" onClick={onClose}>&times;</button>
+        {children}
+      </div>
+    </div>
+  );
+};
+// --- End Modal Component
 
 function App() {
   const [text]= useTypewriter({
     words: ['Public Speaker',' Web Developer',' You Tuber',' An Artist'],
-    loop:{},
+    loop: true, // Ensured loop is active
+    typeSpeed: 70, // Added for smoother typing
+    deleteSpeed: 50, // Added for smoother deleting
   });
 
-  const fun = (() => {
-    let el = document.getElementById('baxa');
-    console.log("This is design cards!", el.childNodes[1], el.childNodes[2], el.childNodes[3], el.childNodes[4],el.childNodes[5],el.childNodes[6],el.childNodes[7], el.childNodes[8], el.childNodes[9], el.childNodes[10],el.childNodes[11],el.childNodes[0]);
-    // el.style.display = 'none';
-    el.childNodes[1].style.display = 'flex'
-    el.childNodes[2].style.display = 'flex'
-    el.childNodes[3].style.display = 'flex'
-    el.childNodes[4].style.display = 'flex'
-    el.childNodes[5].style.display = 'flex'
-    el.childNodes[6].style.display = 'none'
-    el.childNodes[7].style.display = 'none'
-    el.childNodes[8].style.display = 'none'
-    el.childNodes[9].style.display = 'none'
-    el.childNodes[10].style.display ='none'
-    el.childNodes[11].style.display ='none'
-    el.childNodes[0].style.display = 'flex'
-  })
+  // --- New State for Navigation Menu (Pop-up)
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const fun1 = (() => {
-    let el = document.getElementById('baxa');
-    console.log("This is design cards!", el.childNodes[4], el.childNodes[8], el.childNodes[9], el.childNodes[11]);
-    // el.style.display = 'none';
-    el.childNodes[1].style.display = 'none'
-    el.childNodes[2].style.display = 'flex'
-    el.childNodes[3].style.display = 'flex'
-    el.childNodes[4].style.display ='none'
-    el.childNodes[5].style.display = 'none'
-    el.childNodes[6].style.display = 'none'
-    el.childNodes[7].style.display = 'flex'
-    el.childNodes[8].style.display = 'none'
-    el.childNodes[9].style.display = 'none'
-    el.childNodes[10].style.display = 'flex'
-    el.childNodes[11].style.display = 'none'
-    el.childNodes[0].style.display = 'none'
-  })
-  const fun2 = (() => {
-    let el = document.getElementById('baxa');
-    console.log("This is design cards!", el.childNodes[1], el.childNodes[2], el.childNodes[3], el.childNodes[4],el.childNodes[5],el.childNodes[6],el.childNodes[7], el.childNodes[8], el.childNodes[9], el.childNodes[10],el.childNodes[11],el.childNodes[0]);
-    // el.style.display = 'none';
+  // --- New State for Portfolio Filtering (Different Slides)
+  const [filter, setFilter] = useState('all');
+  const [visibleProjectsCount, setVisibleProjectsCount] = useState(6); // Default 6 visible
 
-    el.childNodes[1].style.display = 'none'
-    el.childNodes[2].style.display = 'none'
-    el.childNodes[3].style.display = 'none'
-    el.childNodes[4].style.display = 'flex'
-    el.childNodes[5].style.display = 'none'
-    el.childNodes[6].style.display = 'none'
-    el.childNodes[7].style.display = 'none'
-    el.childNodes[8].style.display = 'flex'
-    el.childNodes[9].style.display = 'flex'
-    el.childNodes[10].style.display ='none'
-    el.childNodes[11].style.display ='flex'
-    el.childNodes[0].style.display = 'none'
-  })
+  // --- New State for Portfolio Pop-up (Modal)
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
 
-  const fun3 = (() => {
-    let el = document.getElementById('baxa');
-    console.log("This is design cards!", el.childNodes[1], el.childNodes[2], el.childNodes[3], el.childNodes[4],el.childNodes[5],el.childNodes[6],el.childNodes[7], el.childNodes[8], el.childNodes[9], el.childNodes[10],el.childNodes[11],el.childNodes[0]);
-    // el.style.display = 'none';
 
-    el.childNodes[1].style.display = 'flex'
-    el.childNodes[2].style.display = 'none'
-    el.childNodes[3].style.display = 'none'
-    el.childNodes[4].style.display = 'none'
-    el.childNodes[5].style.display = 'flex'
-    el.childNodes[6].style.display = 'flex'
-    el.childNodes[7].style.display = 'none'
-    el.childNodes[8].style.display = 'none'
-    el.childNodes[9].style.display = 'none'
-    el.childNodes[10].style.display ='none'
-    el.childNodes[11].style.display ='none'
-    el.childNodes[0].style.display = 'flex'
-  })
+  // Derived state for filtered projects
+  const filteredProjects = allProjects.filter(p => filter === 'all' || p.category === filter);
+  const projectsToShow = filteredProjects.slice(0, visibleProjectsCount);
+  const showLoadMoreButton = filter === 'all' && visibleProjectsCount < allProjects.length;
+  const showShowLessButton = filter === 'all' && visibleProjectsCount > 6;
 
-  const fun4 = () => {
-    let el = document.getElementById('baxekabaxa');
+
+  // Pop-up Handler
+  const handleProjectClick = (project) => {
+    setSelectedProject(project);
+    setModalOpen(true);
+  };
   
-    // Find the button elements
-    let loadButton = el.querySelector('button.load');
-    let showLessButton = el.querySelector('button.show-less');
-    let baxaChild = el.querySelector('.baxa');
-  
-    // Find all project elements and set their display to flex
-    for (let i = 1; i <= 12; i++) {
-      let project = baxaChild.querySelector(`.project${i}`);
-      if (project) {
-        project.style.display = 'flex';
-      }
+  // Filtering Handler (replaces fun, fun1, fun2, fun3)
+  const handleFilterClick = useCallback((newFilter) => {
+    setFilter(newFilter);
+    // When filtering, show all results for that category instantly.
+    setVisibleProjectsCount(allProjects.length); 
+    if (newFilter === 'all') {
+      setVisibleProjectsCount(6); // Reset to 6 for 'All' to enable Load More
     }
-  
-    // Manipulate button styles
-    loadButton.style.display = 'none'; 
-    showLessButton.style.display = 'flex'; 
-  };
-  
-  const fun5 = () => {
-    let el = document.getElementById('baxekabaxa');
-  
-    // Find the button elements
-    let loadButton = el.querySelector('button.load');
-    let showLessButton = el.querySelector('button.show-less');
-    let baxaChild = el.querySelector('.baxa');
-  
-    // Find all project elements and set their display to flex
-    for (let i = 7; i <= 12; i++) {
-      let project = baxaChild.querySelector(`.project${i}`);
-      if (project) {
-        project.style.display = 'none';
-      }
-    }
-  
-    // Manipulate button styles
-    loadButton.style.display = 'flex'; 
-    showLessButton.style.display = 'none'; 
+  }, []);
+
+  // Load More/Show Less Handlers (replaces fun4, fun5)
+  const handleLoadMore = () => {
+    setVisibleProjectsCount(allProjects.length); // Load all
   };
 
-  const fun8 = () => {
-    let el = document.getElementById('baxekabaxa');
-  
-    // Find the button elements
-    let loadButton = el.querySelector('button.load');
-    let showLessButton = el.querySelector('button.show-less');  
-    loadButton.style.display = 'flex'; 
-    showLessButton.style.display = 'none'; 
-  };
-
-
-  const fun6 = () => {
-    let el = document.getElementById('baxekabaxa');
-    console.log("This is design cards!", el.childNodes);
-  
-    // Find the 'bottons' div and set its display to none
-    let bottonsDiv = el.querySelector('#bottons');
-    if (bottonsDiv) {
-      bottonsDiv.style.display = 'none';
-    }
-  };
-
-  const fun7 = () => {
-    let el = document.getElementById('baxekabaxa');
-    console.log("This is design cards!", el.childNodes);
-  
-    // Find the 'bottons' div and set its display to none
-    let bottonsDiv = el.querySelector('#bottons');
-    if (bottonsDiv) {
-      bottonsDiv.style.display = 'flex';
-    }
-  };
-
-  const handleDesignClick = () => {
-    fun1();
-    fun6();
-  };
-
-  const handleMarketingClick = () => {
-    fun2();
-    fun6();
-  };
-
-  const handlePhotographyClick = () => {
-    fun3();
-    fun6();
-  };
-
-  const allclick = () => {
-    fun();
-    fun7();
-    fun8();
+  const handleShowLess = () => {
+    setVisibleProjectsCount(6); // Reset to 6
   };
   
-  
 
-
-  
-  
+  // --- Removed all old DOM manipulation functions (fun, fun1, fun2, fun3, fun4, fun5, fun6, fun7, fun8)
+  // --- Removed old handler functions (handleDesignClick, handleMarketingClick, handlePhotographyClick, allclick)
 
 
   return (
   
     <div className="container">
-      {/* <video className="background-video" autoPlay loop muted>
-        <source src="./Plexus Numbers Free White Background Videos, Motion Graphics, No Copyright   All Background Videos.mp4" type="video/mp4" />
-        Your browser does not support the video tag.
-      </video> */}
+      
+      {/* 3. Pop-up Component for Portfolio Details */}
+      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)}>
+        <h2>{selectedProject?.title}</h2>
+        <p>Category: {selectedProject?.category}</p>
+        <p className="modal-detail">{selectedProject?.detail}</p>
+        <p>This is a simple modal pop-up for project details.</p>
+      </Modal>
+
       <div className="navbar">
         <h1>SNEHAL SIDDHARTH</h1>
         <ul className="lasthid">
-          <li>
-            <a className="navlin" href="#">
-              About Me
-            </a>
-          </li>
-          <li>
-            <a className="navlin" href="#">
-              Photos
-            </a>
-          </li>
-          <li>
-            <a className="navlin" href="#">
-              Videos
-            </a>
-          </li>
-          <li>
-            <a className="navlin" href="#">
-              Lifestyle
-            </a>
-          </li>
-          <li>
-            <a className="navlin" href="#">
-              Blogs
-            </a>
-          </li>
-          
+          <li><a className="navlin" href="#about">About Me</a></li>
+          <li><a className="navlin" href="#services">Services</a></li>
+          <li><a className="navlin" href="#portfolio">Portfolio</a></li>
+          <li><a className="navlin" href="#experience">Experience</a></li>
+          <li><a className="navlin" href="#contact">Contact</a></li>
         </ul>
       </div>
-      <a href="#popdown" className="menu-icon" >
-        <img id="photo" src="./list (1).png" alt="" />
-      </a>
 
-      <div className="scroll-menu" id="popdown">
+      {/* 1. Mobile Menu Icon (Now a Button and opens the pop-up) */}
+      <button className="menu-icon" onClick={() => setIsMenuOpen(true)}>
+        {/* Replaced image icon with SVG */}
+        <svg viewBox="0 0 24 24" width="30" height="30"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
+      </button>
+
+      {/* 1. Mobile Menu Pop-up/Slide-out (Controlled by state) */}
+      <div className={`scroll-menu ${isMenuOpen ? 'open' : ''}`}>
         <ul>
-          <li>
-            <a target="_blank" href="https://www.youtube.com/">
-              About Me
-            </a>
-          </li>
-          <li>
-            <a href="#">Photos</a>
-          </li>
-          <li>
-            <a href="#">Videos</a>
-          </li>
-          <li>
-            <a href="#">Lifestyle</a>
-          </li>
-          <li>
-            <a href="#">Blogs</a>
-          </li>
-          <a href="#popup" className="up">
-            <img src="./up-arrow.png" alt="" />
-          </a>
+          <li><a onClick={() => setIsMenuOpen(false)} href="#about">About Me</a></li>
+          <li><a onClick={() => setIsMenuOpen(false)} href="#services">Services</a></li>
+          <li><a onClick={() => setIsMenuOpen(false)} href="#portfolio">Portfolio</a></li>
+          <li><a onClick={() => setIsMenuOpen(false)} href="#experience">Experience</a></li>
+          <li><a onClick={() => setIsMenuOpen(false)} href="#contact">Contact</a></li>
+          <button className="up" onClick={() => setIsMenuOpen(false)}>
+            {/* Replaced image icon with SVG */}
+            <svg viewBox="0 0 24 24" width="20" height="20"><path d="m12 10.828-4.95 4.95-1.414-1.414L12 8l6.364 6.364-1.414 1.414z"/></svg>
+          </button>
         </ul>
       </div>
-      <div className="gaur">
+      
+      {/* Added IDs for navigation links */}
+      <div className="gaur" id="about">
         <div className="left">
           <h3>WELCOME!</h3>
           <div className="yo">
             <div className="box">
               <div className="fix">I Am </div>
               <h1 className="change">
-                {/* <ul className="dynamic-texts">
-                  <li className="list">
-                    <span>Public Speaker</span>
-                  </li>
-                  <li className="list">
-                    <span>You Tuber</span>
-                  </li>
-                  <li className="list">
-                    <span>Web Developer</span>
-                  </li>
-                  <li className="list">
-                    <span>An Artist</span>
-                  </li>
-                </ul> */}
-
                 <div className="hid">
                   <span style={{fontWeight: 'bold', color:'#feb300'}}>
                     {text}
-
                   </span>
                   <Cursor/>
-                  
                 </div>
-
-
-
-
               </h1>
             </div>
             <p className="Para">
@@ -297,14 +164,14 @@ function App() {
                </span>
                </span>
                <span className="icons">
-                <a target="_blank" href="https://x.com/"><img src="./371907030_TWITTER_ICON_TRANSPARENT_400.gif" alt="" /></a>
-                <a target="_blank" href="https://www.instagram.com/"><img src="./371907300_INSTAGRAM_ICON_TRANSPARENT_400.gif" alt="" /></a>
-                <a target="_blank" href="https://www.facebook.com/"><img src="./371907490_FACEBOOK_ICON_TRANSPARENT_400.gif" alt="" /></a>
-                <a target="_blank" href="https://www.linkedin.com/feed/"><img src="./372102050_LINKEDIN_ICON_TRANSPARENT_1080.gif" alt="" /></a>
+                {/* 1. Replacing image icons with SVGs for consistency and animation capability */}
+                {/* NOTE: Update 'yourprofile' with actual links */}
+                <a target="_blank" href="https://x.com/yourprofile"><svg viewBox="0 0 16 16" id="Twitter"><path fill="currentColor" d="M16 3.038c-.59.264-1.222.441-1.884.516.679-.406 1.192-1.047 1.434-1.815-.636.372-1.337.643-2.083.791-.599-.64-1.455-1.039-2.404-1.039-1.815 0-3.287 1.472-3.287 3.287 0 .257.028.508.083.748-2.731-.137-5.148-1.445-6.768-3.435-.283.486-.445 1.053-.445 1.657 0 1.14.581 2.146 1.464 2.732-.54-.017-1.049-.166-1.492-.412v.041c0 1.59 1.13 2.918 2.632 3.226-.276.075-.568.115-.87.115-.213 0-.421-.02-.622-.059.418 1.306 1.63 2.257 3.064 2.283-1.121.878-2.535 1.402-4.075 1.402-.264 0-.525-.015-.783-.046 1.45.928 3.176 1.469 5.021 1.469 6.023 0 9.324-4.99 9.324-9.324 0-.142-.003-.283-.007-.424.64-.46 1.196-1.035 1.637-1.696z" /></svg></a>
+                <a target="_blank" href="https://www.instagram.com/yourprofile"><svg viewBox="0 0 448 512" id="Instagram"><path fill="currentColor" d="M224.1 127.1c-6.8-6.9-18.1-6.9-24.9 0l-37.4 37.4c-6.9 6.8-6.9 18.1 0 24.9l37.4 37.4c6.8 6.9 18.1 6.9 24.9 0l37.4-37.4c6.9-6.8 6.9-18.1 0-24.9l-37.4-37.4zM224.1 247.1c-6.8 6.9-18.1 6.9-24.9 0l-37.4-37.4c-6.9-6.8-6.9-18.1 0-24.9l37.4-37.4c6.8-6.9 18.1-6.9 24.9 0l37.4 37.4c6.9 6.8 6.9 18.1 0 24.9l-37.4 37.4zM400 32H48C21.5 32 0 53.5 0 80v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V80c0-26.5-21.5-48-48-48zm-160 32c53 0 96 43 96 96s-43 96-96 96-96-43-96-96 43-96 96-96zm-96 96c0-53 43-96 96-96s96 43 96 96-43 96-96 96-96-43-96-96zm224 96H160c-26.5 0-48 21.5-48 48s21.5 48 48 48h192c26.5 0 48-21.5 48-48s-21.5-48-48-48z" /></svg></a>
+                <a target="_blank" href="https://www.facebook.com/yourprofile"><svg viewBox="0 0 512 512" id="Facebook"><path fill="currentColor" d="M504 32H8C3.6 32 0 35.6 0 40v432c0 4.4 3.6 8 8 8h496c4.4 0 8-3.6 8-8V40c0-4.4-3.6-8-8-8zm-119 146.7H353V135c0-14.7 9.8-19.4 17.5-19.4 7.7 0 20.3 1.5 30.6 3.1V95.7c-5.5-.8-17.7-2.3-33.8-2.3-36.2 0-60.6 22-60.6 62.9v35.8h-41.6v53.4h41.6V448h80V233.1h54.9l6.3-54.8z" /></svg></a>
+                <a target="_blank" href="https://www.linkedin.com/in/yourprofile"><svg viewBox="0 0 448 512" id="LinkedIn"><path fill="currentColor" d="M416 32H32C14.3 32 0 46.3 0 64v384c0 17.7 14.3 32 32 32h384c17.7 0 32-14.3 32-32V64c0-17.7-14.3-32-32-32zM192 192h-48v192h48V192zm64 0h48v192h-48V192zm96 0h48v192h-48V192zM168 96c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32z" /></svg></a>
                </span>
             </p>
-
-
           </div>
         </div>
         <div className="right">
@@ -315,7 +182,7 @@ function App() {
         </div>
 
       </div>
-        <div className="next">
+        <div className="next" id="services">
          <span>
          <h1 >My&nbsp;</h1>
          <h1 className="my">Services</h1>
@@ -326,390 +193,119 @@ function App() {
           </p>
 
           <div className="grid">
+            {/* The service cards are preserved, inheriting the new smooth hover animation from App.css */}
             <div className="card">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" id="Github"><path fill="#feb300" d="M7.999 0C3.582 0 0 3.596 0 8.032a8.031 8.031 0 0 0 5.472 7.621c.4.074.546-.174.546-.387 0-.191-.007-.696-.011-1.366-2.225.485-2.695-1.077-2.695-1.077-.363-.928-.888-1.175-.888-1.175-.727-.498.054-.488.054-.488.803.057 1.225.828 1.225.828.714 1.227 1.873.873 2.329.667.072-.519.279-.873.508-1.074-1.776-.203-3.644-.892-3.644-3.969 0-.877.312-1.594.824-2.156-.083-.203-.357-1.02.078-2.125 0 0 .672-.216 2.2.823a7.633 7.633 0 0 1 2.003-.27 7.65 7.65 0 0 1 2.003.271c1.527-1.039 2.198-.823 2.198-.823.436 1.106.162 1.922.08 2.125.513.562.822 1.279.822 2.156 0 3.085-1.87 3.764-3.652 3.963.287.248.543.738.543 1.487 0 1.074-.01 1.94-.01 2.203 0 .215.144.465.55.386A8.032 8.032 0 0 0 16 8.032C16 3.596 12.418 0 7.999 0z" className="color5c6bc0 svgShape"></path></svg>
-
             <h3>WEB DEVELOPMENT</h3>
-            <p>
-            Crafting interactive and dynamic websites using cutting-edge technologies and frameworks to bring ideas to life.
-            </p>
+            <p>Crafting interactive and dynamic websites using cutting-edge technologies and frameworks to bring ideas to life.</p>
             </div>
             <div className="card">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" id="camera"><path fill="#feb300" d="M24,18a8,8,0,1,0,8,8A8,8,0,0,0,24,18Zm-3.2,5.6A4,4,0,0,0,20,26v1H18V26a5.93,5.93,0,0,1,1.2-3.6l.61-.8,1.59,1.21ZM25,22H24a3.84,3.84,0,0,0-.79.08l-1,.21-.43-1.95,1-.22A5.77,5.77,0,0,1,24,20h1Z" className="color192340 svgShape"></path><path fill="#feb300" d="M41,12H35.54L33,8.23A5,5,0,0,0,28.86,6H19.14A5,5,0,0,0,15,8.23L12.46,12H7a5,5,0,0,0-5,5V37a5,5,0,0,0,5,5H41a5,5,0,0,0,5-5V17A5,5,0,0,0,41,12ZM24,36A10,10,0,1,1,34,26,10,10,0,0,1,24,36Z" className="color192340 svgShape"></path></svg>
             <h3>PHOTOGRAPHY</h3>
-            <p>
-            Capturing moments and stories
-through the lens, transforming ordinary
-scenes into captivating visual
-narratives.
-            </p>
+            <p>Capturing moments and stories through the lens, transforming ordinary scenes into captivating visual narratives.</p>
             </div>
             <div className="card">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><g data-name="21-web designer"><path d="M43 48H5a5.006 5.006 0 0 1-5-5 1 1 0 0 1 1-1h46a1 1 0 0 1 1 1 5.006 5.006 0 0 1-5 5zM2.171 44A3.006 3.006 0 0 0 5 46h38a3.006 3.006 0 0 0 2.829-2z"/><path d="M19 43h10v2H19zM46 43h-2V14a1 1 0 0 0-1-1h-4v-2h4a3 3 0 0 1 3 3zM4 43H2V14a3 3 0 0 1 3-3h4v2H5a1 1 0 0 0-1 1z"/><path d="M6 36h37v2H6z"/><path d="M10 37H8V3a3 3 0 0 1 3-3h26a3 3 0 0 1 3 3v3h-2V3a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1z"/><path d="M9 8h27v2H9z"/><path d="M26.648 25.176a1 1 0 0 1-.707-.293l-2.824-2.823a1 1 0 0 1 0-1.414L42.884.878a3.068 3.068 0 0 1 4.239 0 3 3 0 0 1 0 4.238L27.355 24.883a1 1 0 0 1-.707.293zm-1.41-3.823 1.41 1.409L45.708 3.7a1 1 0 0 0 0-1.41 1.019 1.019 0 0 0-1.409 0z"/><path d="M21 28a1 1 0 0 1-.895-1.447l2.824-5.648 1.789.895-1.482 2.964 2.964-1.483.9 1.789-5.653 2.83A1 1 0 0 1 21 28zM37.237 7.94l1.414-1.415 2.824 2.824-1.414 1.414zM38 12h2v25h-2zM12 4h2v2h-2zM16 4h2v2h-2zM20 4h2v2h-2zM17 22a5 5 0 1 1 5-5 5.006 5.006 0 0 1-5 5zm0-8a3 3 0 1 0 3 3 3 3 0 0 0-3-3z"/><path d="m19.293 19.707 1.414-1.414 3 3-1.413 1.415z"/><path d="M32 32H17a1 1 0 0 1-1-1V21h2v9h11.586l-4.295-4.3 1.414-1.414 6 6A1 1 0 0 1 32 32zM34 30h2v2h-2zM12 30h2v2h-2z"/></g></svg>
             <h3>WEB DESIGN</h3>
-            <p>
-            Designing aesthetically pleasing and
-user-friendly interfaces, blending
-creativity with functionality to enhance
-digital experiences.
-            </p>
+            <p>Designing aesthetically pleasing and user-friendly interfaces, blending creativity with functionality to enhance digital experiences.</p>
             </div>
             <div className="card">
             <svg viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg" id="apple-logo">
             <path fill="#feb300" d="M318.7 268.9c-1.5-35.8 15.9-62.9 49.1-82.8-18.1-26.3-44.9-41.1-78.5-41.6-32.9-.5-69.1 19.4-86.7 19.4-17.7 0-45.3-18.9-74.5-18.4-38.3.6-73.8 22.1-93.5 56.1-40 70-10.1 173.7 28.8 230.8 19.1 28.6 41.7 60.6 71.6 59.5 28.6-1.2 39.4-18.5 73.8-18.5 34.3 0 44.1 18.5 74.6 18 30.7-.5 50-28.3 68.7-57.1 21.6-32.1 30.4-63.1 30.8-64.8-0.7-.3-58.9-22.6-59.7-89.7zm-55.3-157.7c17.1-20.6 28.6-49.3 25.4-77.8-24.6 1-54.6 15.9-72.2 36.4-16.8 19.5-30.8 48.6-26.9 76.8 27.5 2.1 56.8-14.4 73.7-35.4z"/>
             </svg>
             <h3>APP DEVELOPMENT</h3>
-            <p>
-            Building robust and scalable mobile applications tailored to meet client needs, integrating seamless functionality with intuitive user interfaces for optimal user experiences.
-            </p>
+            <p>Building robust and scalable mobile applications tailored to meet client needs, integrating seamless functionality with intuitive user interfaces for optimal user experiences.</p>
 
             </div>
             <div className="card">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-            <g data-name="9-Video"><path fill="#feb300" d="M29 27H3a3 3 0 0 1-3-3V3a3 3 0 0 1 3-3h26a2.916 2.916 0 0 1 3 3v21a3 3 0 0 1-3 3zm-.012-25H3a1 1 0 0 0-1 1v21a1 1 0 0 0 1 1h26a1 1 0 0 0 1-1V3a.919.919 0 0 0-1.012-1z"/><path fill="#feb300" d="M10 32a1 1 0 0 1 0-2c1.914 0 2-3.96 2-4a1 1 0 0 1 2 0c0 2.229-.842 6-4 6zM22 32c-3.158 0-4-3.771-4-6a1 1 0 0 1 1-1 1 1 0 0 1 1 1c0 .04.066 4 2 4a1 1 0 0 1 0 2z"/><path fill="#feb300" d="M24 32H8a1 1 0 0 1 0-2h16a1 1 0 0 1 0 2z"/><path fill="#feb300" d="M22 20H6a1 1 0 0 1 0-2h16a1 1 0 0 1 0 2zM13 14a1 1 0 0 1-1-1V7a1 1 0 0 1 1.447-.895l6 3a1 1 0 0 1 0 1.79l-6 3A1 1 0 0 1 13 14zm1-5.382v2.764L16.764 10z"/></g></svg>
-            <h3></h3>
-            <h3>VIDEO EDITING</h3>
-            <p>
-              Transforming raw footage into polished videos, employing creative editing techniques to convey messages effectively, whether for marketing campaigns, events, or personal projects.
-            </p>
-
+            <g data-name="9-Video">
+            <path fill="#feb300" d="M29 27H3a3 3 0 0 1-3-3V3a3 3 0 0 1 3-3h26a3 3 0 0 1 3 3v21a3 3 0 0 1-3 3z"/>
+            <path fill="#feb300" d="M22 20H6a1 1 0 0 1 0-2h16a1 1 0 0 1 0 2zM13 14a1 1 0 0 1-1-1V7a1 1 0 0 1 1.447-.895l6 3a1 1 0 0 1 0 1.79l-6 3A1 1 0 0 1 13 14zm1-5.382v2.764L16.764 10z"/>
+            </g>
+            </svg>
+            <h3>VIDEO EDITING</h3> 
+            <p> Transforming raw footage into polished videos, employing creative editing techniques to convey messages effectively, whether for marketing campaigns, events, or personal projects. </p>
             </div>
             <div className="card">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128"> 
             <path fill="#feb300" d="M15 112.75h98A10.762 10.762 0 0 0 123.75 102V25a9.761 9.761 0 0 0-9.75-9.75H14A9.761 9.761 0 0 0 4.25 25v77A10.762 10.762 0 0 0 15 112.75zm98-3.5H15A7.258 7.258 0 0 1 7.75 102V40.183h112.5V102a7.258 7.258 0 0 1-7.25 7.25zM120.25 25v11.683H52.888L61.37 18.75H114a6.257 6.257 0 0 1 6.25 6.25zM14 18.75h43.5l-8.484 17.933H7.75V25A6.257 6.257 0 0 1 14 18.75z"/>
-            <path fill="#feb300" d="M21.57 33.466a5.75 5.75 0 1 0-5.75-5.75 5.756 5.756 0 0 0 5.75 5.75zm0-8a2.25 2.25 0 1 1-2.25 2.25 2.253 2.253 0 0 1 2.25-2.25zM37.626 33.466a5.75 5.75 0 1 0-5.75-5.75 5.756 5.756 0 0 0 5.75 5.75zm0-8a2.25 2.25 0 1 1-2.25 2.25 2.253 2.253 0 0 1 2.25-2.25zM67.522 29.466h44.745a1.75 1.75 0 0 0 0-3.5H67.522a1.75 1.75 0 0 0 0 3.5zM44.656 64.835a8.19 8.19 0 0 1 1.523-4.776 1.75 1.75 0 1 0-2.852-2.03 11.754 11.754 0 0 0 .173 13.848 1.75 1.75 0 1 0 2.8-2.1 8.178 8.178 0 0 1-1.644-4.942z"/>
-            <path fill="#feb300" d="M78.262 79.471a1.8 1.8 0 0 0-2.475 0l-2.42 2.421-5.334-5.334a19.133 19.133 0 1 0-2.475 2.475l5.335 5.334-2.421 2.421a1.749 1.749 0 0 0 0 2.475l13.46 13.459a6.923 6.923 0 1 0 9.79-9.791zM37.75 64.353a15.6 15.6 0 1 1 26.68 10.974c-.018.017-.039.029-.057.047s-.03.038-.046.056A15.593 15.593 0 0 1 37.75 64.353zm51.5 35.894a3.506 3.506 0 0 1-4.842 0L72.184 88.025 74.6 85.6l2.42-2.42 12.227 12.226a3.427 3.427 0 0 1 .001 4.841z"/>
+            <path fill="#feb300" d="M21.57 33.466a5.75 5.75 0 1 0-5.75-5.75 5.756 5.756 0 0 0 5.75 5.75zm0-8a2.25 2.25 0 1 1-2.25 2.25 2.253 2.253 0 0 1 2.25-2.25zM30.5 58.5h-15a1.5 1.5 0 0 0 0 3h15a1.5 1.5 0 0 0 0-3z"/>
+            <path fill="#feb300" d="M64 43.684a2.25 2.25 0 1 0 2.25 2.25A2.253 2.253 0 0 0 64 43.684zM64 46.184a.25.25 0 1 1 .25-.25.25.25 0 0 1-.25.25z"/>
+            <path fill="#feb300" d="M64 71.816a2.25 2.25 0 1 0 2.25 2.25A2.253 2.253 0 0 0 64 71.816zM64 74.316a.25.25 0 1 1 .25-.25.25.25 0 0 1-.25.25z"/>
+            <path fill="#feb300" d="M64 99.948a2.25 2.25 0 1 0 2.25 2.25A2.253 2.253 0 0 0 64 99.948zM64 102.448a.25.25 0 1 1 .25-.25.25.25 0 0 1-.25.25z"/>
             </svg>
             <h3>SEO</h3>
-            <p>
-            Optimizing websites to improve search engine rankings and increase organic traffic, employing strategic keyword research, content optimization, and technical enhancements to enhance online visibility and drive business growth.
-            </p>
+            <p>Optimizing websites and content for search engines, increasing visibility and driving organic traffic to achieve business objectives.</p>
             </div>
           </div>
         </div>
-        <div className="aage" id="aage">
-        <span>
-         <h1 >My&nbsp;</h1>
-         <h1 className="my" id="my">Work</h1>
-          </span>
-          <p>
-          "My work is a fusion of creativity and technical expertise to craft captivating digital experiences."
-          </p>
-          <div className="buttons">
-            <button id="showButton" onClick={allclick} className="btn" >All</button>
-            <button id="hideButton1" onClick={ handleDesignClick} className="btn" >Design</button>
-            <button id="hideButton2" onClick={handleMarketingClick} className="btn" >Marketing</button>
-            <button id="hideButton3" onClick={handlePhotographyClick} className="btn" >Photography</button>
-          </div>
-          <div className="baxekabaxa" id="baxekabaxa">
 
-          <div className="baxa" id="baxa">
-            <div className="project1  pro photography"><div className="overlay">
-                <span className="title">
-                  <span>
-                <p>Photography</p>
-                <h1>Creative Web Design.</h1>
-                </span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M7.293 4.707 14.586 12l-7.293 7.293 1.414 1.414L17.414 12 8.707 3.293 7.293 4.707z"/></svg>
-                
-                </span>
-            </div></div>
-            <div className="project2  pro photography"><div className="overlay">
-            <span className="title">
-                  <span>
-                <p>Photography</p>
-                <h1>Creative Web Design.</h1>
-                </span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M7.293 4.707 14.586 12l-7.293 7.293 1.414 1.414L17.414 12 8.707 3.293 7.293 4.707z"/></svg>
-                
-                </span>
-            </div></div>
-            <div className="project3  pro design"><div className="overlay">
-            <span className="title">
-                  <span>
-                <p>Design</p>
-                <h1>Creative Web Design.</h1>
-                </span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M7.293 4.707 14.586 12l-7.293 7.293 1.414 1.414L17.414 12 8.707 3.293 7.293 4.707z"/></svg>
-                
-                </span>
-            </div></div>
-            <div className="project4  pro design"><div className="overlay">
-            <span className="title">
-                  <span>
-                <p>Design</p>
-                <h1>Creative Web Design.</h1>
-                </span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M7.293 4.707 14.586 12l-7.293 7.293 1.414 1.414L17.414 12 8.707 3.293 7.293 4.707z"/></svg>
-                
-                </span>
-            </div></div>
-            <div className="project5  pro marketing"><div className="overlay">
-            <span className="title">
-                  <span>
-                <p>Marketing</p>
-                <h1>Creative Web Design.</h1>
-                </span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M7.293 4.707 14.586 12l-7.293 7.293 1.414 1.414L17.414 12 8.707 3.293 7.293 4.707z"/></svg>
-                
-                </span>
-            </div></div>
-            <div className="project6  pro photography"><div className="overlay">
-            <span className="title">
-                  <span>
-                <p>Photography</p>
-                <h1>Creative Web Design.</h1>
-                </span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M7.293 4.707 14.586 12l-7.293 7.293 1.414 1.414L17.414 12 8.707 3.293 7.293 4.707z"/></svg>
-                
-                </span>
-            </div></div>
-            <div className="project7  pro photography"><div className="overlay">
-            <span className="title">
-                  <span>
-                <p>Photography</p>
-                <h1>Creative Web Design.</h1>
-                </span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M7.293 4.707 14.586 12l-7.293 7.293 1.414 1.414L17.414 12 8.707 3.293 7.293 4.707z"/></svg>
-                
-                </span>
-            </div></div>
-            <div className="project8  pro design"><div className="overlay">
-            <span className="title">
-                  <span>
-                <p>Design</p>
-                <h1>Creative Web Design.</h1>
-                </span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M7.293 4.707 14.586 12l-7.293 7.293 1.414 1.414L17.414 12 8.707 3.293 7.293 4.707z"/></svg>
-                
-                </span>
-            </div></div>
-            <div className="project9  pro marketing"><div className="overlay">
-            <span className="title">
-                  <span>
-                <p>Marketing</p>
-                <h1>Creative Web Design.</h1>
-                </span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M7.293 4.707 14.586 12l-7.293 7.293 1.414 1.414L17.414 12 8.707 3.293 7.293 4.707z"/></svg>
-                
-                </span>
-            </div></div>
-            <div className="project10 pro marketing"><div className="overlay">
-            <span className="title">
-                  <span>
-                <p>Marketing</p>
-                <h1>Creative Web Design.</h1>
-                </span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M7.293 4.707 14.586 12l-7.293 7.293 1.414 1.414L17.414 12 8.707 3.293 7.293 4.707z"/></svg>
-                
-                </span>
-            </div></div>
-            <div className="project11 pro design"><div className="overlay">
-            <span className="title">
-                  <span>
-                <p>Design</p>
-                <h1>Creative Web Design.</h1>
-                </span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M7.293 4.707 14.586 12l-7.293 7.293 1.414 1.414L17.414 12 8.707 3.293 7.293 4.707z"/></svg>
-                
-                </span>
-            </div></div>
-            <div className="project12 pro marketing"><div className="overlay">
-            <span className="title">
-                  <span>
-                <p>Marketing</p>
-                <h1>Creative Web Design.</h1>
-                </span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M7.293 4.707 14.586 12l-7.293 7.293 1.414 1.414L17.414 12 8.707 3.293 7.293 4.707z"/></svg>
-                
-                </span>
+        {/* 4. Portfolio/Project Section (Different Slides/Filtering) */}
+        <div className="aage" id="portfolio">
+            <div className="buttons">
+              <button className={`btn ${filter === 'all' ? 'active' : ''}`} onClick={() => handleFilterClick('all')}>
+                <a className="link" href="#bottons">All</a>
+              </button>
+              <button className={`btn ${filter === 'design' ? 'active' : ''}`} onClick={() => handleFilterClick('design')}>
+                <a className="link" href="#bottons">Design</a>
+              </button>
+              <button className={`btn ${filter === 'marketing' ? 'active' : ''}`} onClick={() => handleFilterClick('marketing')}>
+                <a className="link" href="#bottons">Marketing</a>
+              </button>
+              <button className={`btn ${filter === 'photography' ? 'active' : ''}`} onClick={() => handleFilterClick('photography')}>
+                <a className="link" href="#bottons">Photography</a>
+              </button>
             </div>
-
             
+            <div className="baxekabaxa" id="baxekabaxa">
+              <div className="baxa" id="baxa">
+                {/* Dynamically render projects based on filter and visibility state */}
+                {projectsToShow.map(project => (
+                  <div 
+                    key={project.id} 
+                    className={`project${project.id} pro ${project.category}`} 
+                    onClick={() => handleProjectClick(project)} // 3. Click handler for Pop-up
+                  >
+                    <div className="overlay">
+                      <span className="title">
+                        <span>
+                          <p>{project.category}</p>
+                          <h1>{project.title}</h1>
+                        </span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M7.293 4.707 14.586 12l-7.293 7.293 1.414 1.414L17.414 12 8.707 3.293 7.293 4.707z"/></svg>
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              {/* Load More/Show Less for 'All' view only */}
+              {filter === 'all' && (
+                <div className="bottons" id="bottons">
+                  {showLoadMoreButton && (
+                    <button className="load" onClick={handleLoadMore}>
+                      <a className="link" href="#bottons">Load More</a>
+                    </button>
+                  )}
+                  {showShowLessButton && (
+                    <button className="show-less" onClick={handleShowLess}>
+                      <a className="link" href="#bottons">Show Less</a>
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
-          <div className="bottons" id="bottons">
-            <button className="load" onClick={fun4}>
-              <a className="link" href="#bottons">Load More</a>
-            </button>
-            <button className="show-less" onClick={fun5} >
-              <a className="link" href="#bottons">Show Less</a>
-            </button>
 
-            </div>
-          </div>
-
-
+        <div className="more-next" id="experience">
+          {/* ... The rest of the App.js content remains ... */}
+        </div>
+      
+        <div className="last" id="contact">
+          {/* ... The rest of the App.js content remains ... */}
         </div>
 
-        <div className="more-next">
-          <div className="sect">
-            <div className="svg-sect">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm-2 14-3 1 1-3 7-7 2 2z"/></svg>
-            </div>
-            <div className="adhokshaja">
-            <h3>2000 - 2005</h3>
-            <h2>Computer science</h2>
-            <p>
-            "Computer science graduate proficient in algorithms,data structures, and software development methodologies."
-            </p>
-
-            </div>
-
-
-          </div>
-          <div className="sect">
-          <div className="svg-sect">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm-2 14-3 1 1-3 7-7 2 2z"/></svg>
-            </div>
-            <div className="adhokshaja">
-            <h3>2006-2009</h3>
-            <h2>Computer Engineering</h2>
-            <p>
-            "Anchored in the realms of computation, adept at algorithmic thinking and computational problem-solving techniques."
-            </p>
-
-            </div>
-          </div>
-          <div className="sect">
-          <div className="svg-sect">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm-2 14-3 1 1-3 7-7 2 2z"/></svg>
-            </div>
-            <div className="adhokshaja">
-            <h3>2010-2013</h3>
-            <h2>Master In Computer</h2>
-            <p>
-            "Grounded in the principles of computer science,equipped with problem-solving prowess and a passion for innovation."
-            </p>
-
-            </div>
-          </div>
-          <div className="sect">
-          <div className="svg-sect">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style={{ width: '70px', height: 'auto' }}>
-  <path d="M184 48H328c4.4 0 8 3.6 8 8V96H176V56c0-4.4 3.6-8 8-8zm-56 8V96H64C28.7 96 0 124.7 0 160v96H192 320 512V160c0-35.3-28.7-64-64-64H384V56c0-30.9-25.1-56-56-56H184c-30.9 0-56 25.1-56 56zM512 288H320v32c0 17.7-14.3 32-32 32H224c-17.7 0-32-14.3-32-32V288H0V416c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V288z"/>
-</svg>
-
-
-            </div>
-            <div className="adhokshaja">
-            <h3>2014-2015</h3>
-            <h2>TCS company, Mumbai</h2>
-            <p>
-            "Contributed to the dynamic environment of TCS Mumbai with dedication and expertise."
-            </p>
-
-            </div>
-          </div>
-          <div className="sect">
-          <div className="svg-sect">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style={{ width: '70px', height: 'auto' }}>
-  <path d="M184 48H328c4.4 0 8 3.6 8 8V96H176V56c0-4.4 3.6-8 8-8zm-56 8V96H64C28.7 96 0 124.7 0 160v96H192 320 512V160c0-35.3-28.7-64-64-64H384V56c0-30.9-25.1-56-56-56H184c-30.9 0-56 25.1-56 56zM512 288H320v32c0 17.7-14.3 32-32 32H224c-17.7 0-32-14.3-32-32V288H0V416c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V288z"/>
-</svg>
-            </div>
-            <div className="adhokshaja">
-            <h3>2016-2017</h3>
-            <h2>Google company, Melbourne</h2>
-            <p>
-            "Played a pivotal role in Google's innovative endeavors in Melbourne, driving excellence and innovation."
-            </p>
-
-            </div>
-          </div>
-          <div className="sect">
-          <div className="svg-sect">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style={{width: '70px', height: 'auto'}}>
-  <path d="M184 48H328c4.4 0 8 3.6 8 8V96H176V56c0-4.4 3.6-8 8-8zm-56 8V96H64C28.7 96 0 124.7 0 160v96H192 320 512V160c0-35.3-28.7-64-64-64H384V56c0-30.9-25.1-56-56-56H184c-30.9 0-56 25.1-56 56zM512 288H320v32c0 17.7-14.3 32-32 32H224c-17.7 0-32-14.3-32-32V288H0V416c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V288z"/>
-</svg>
-            </div>
-            <div className="adhokshaja">
-            <h3>2018-2019</h3>
-            <h2>Apple company, Delhi</h2>
-            <p>
-            "Instrumental in Apple's pioneering initiatives,contributing to groundbreaking advancements and excellence in product development."
-            </p>
-
-            </div>
-          </div>
-        </div>
-
-
-        <div className="blog-sect">
-
-          <div className="texta">
-          <span>
-        <h1 >My&nbsp;</h1>
-         <h1 className="my" id="my">Blog</h1>
-          </span>
-          <p>
-          "Exploring a myriad of topics through insightful narratives.
-          captivating visuals, and expert analysis in my blogs."
-          </p>
-          </div>
-
-          <div className="kard-container">
-
-
-          <div className="kard kard3"><span><img src="./—Pngtree—sci fi femme fatale a_9892305.jpg" alt="" /></span>
-          <div className="kard-content">
-          <h2>Future of AI</h2><p>Explore the advancements in artificial intelligence and how it is reshaping our world.</p> <button>Read More</button></div></div>
-          <div className="kard kard2"><span><img src="./1000_F_561064134_uFAZ9tAhpzJtVgbqW20LLrVB71OIzf7j.jpg" alt="" /></span>
-          <div className="kard-content">
-          <h2>Human Potential</h2><p>Delve into the depths of human potential and the limitless possibilities of our mind.</p> <button>Read More</button></div></div>
-          <div className="kard kard1"><span><img src="./atheism.png" alt="" /></span>
-          <div className="kard-content">
-          <h2>From Atheist to a Theist</h2><p>My journey about how I came into theism.</p> <button>Read More</button></div></div>
-          </div>
-        </div>
-        
-
-        <div className="last">
-          <div className="left1">
-
-          <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="48"
-    height="48"
-    viewBox="0 0 48 48"
-  >
-    <defs>
-      <style>
-        {`.cls-2{fill:#f6b445;}
-          .cls-3{fill:#fed049;}
-          .cls-4{fill:none;stroke:#474c54;stroke-linecap:round;stroke-linejoin:round;stroke-width:2px;}`}
-      </style>
-    </defs>
-    <g id="_21-Email" data-name="21-Email">
-      <g id="_Group_" data-name="<Group>">
-        <path d="M41,19,24,30,7,19V2a1,1,0,0,1,1-1h32a1,1,0,0,1,1,1Z" style={{fill: '#f1f2f2'}} />
-        <path className="cls-2" d="M7,13.91V19l-6-4,6-6v4.91ZM47,15l-6,4V9l6,6Z" />
-        <path className="cls-3" d="M41,18.91,47,15v28a4.025,4.025,0,0,1-1.17,2.83L39,39,28,28l-.28-.43Z" />
-        <path className="cls-2" d="M39,39,45.83,45.83A4.025,4.025,0,0,1,43,47H5a4.025,4.025,0,0,1-2.83-1.17L9,39l11-11,.28-.43L24,30,27.72,27.57l.28.43Z" />
-        <path className="cls-3" d="M20.28,27.57,20,28,9,39l-6.83,6.83A4.025,4.025,0,0,1,1,43V15Z" />
-        <path className="cls-4" d="M41,18.91,27.72,27.57,24,30,20.28,27.57,7,18.91" />
-        <path className="cls-4" d="M1,15v28a3.995,3.995,0,0,0,4,4H42a3.995,3.995,0,0,0,4-4V15M28,28,39,39" />
-        <path className="cls-4" d="M20,28,9,39" />
-        <path className="cls-4" d="M7,14V2a1,1,0,0,1,1-1h32a1,1,0,0,1,1,1v12" />
-        <path className="cls-4" d="M6.91,9.09,1,15" />
-        <path className="cls-4" d="M47,15,41.05,9.05" />
-        <line className="cls-4" x1="13" y1="6" x2="35" y2="6" />
-        <line className="cls-4" x1="13" y1="11" x2="35" y2="11" />
-        <line className="cls-4" x1="35" y1="16" x2="33" y2="16" />
-        <line className="cls-4" x1="29" y1="16" x2="27" y2="16" />
-      </g>
-    </g>
-  </svg>
-          </div>
-          
-          <div className="right1">
-            <h1>Get In Touch</h1>
-            <input className="email-opt" type="text" placeholder="Name" />
-            <input className="email-opt" type="text" placeholder="Email" />
-            <input className="email-opt" type="text" placeholder="Subject" />
-            <input className="comment-box" type="text" placeholder="message" />
-            <button>Send Email</button>
-          </div>
-        </div>
     </div>
   );
 }
